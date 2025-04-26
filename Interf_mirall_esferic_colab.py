@@ -1,22 +1,20 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Apr 23 19:31:29 2025
+Created on Sat Apr 26 10:56:01 2025
 
 @author: polji
 """
 
-import matplotlib
-matplotlib.use('Qt5Agg')
-
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.widgets import Slider
+from ipywidgets import interactive, FloatSlider
+from IPython.display import display
 
 # Paràmetres bàsics
 screen_size = 0.1    # pantalla 10 cm x 10 cm  
 res = 1000           # 1000 x 1000 píxels
 long_ona = 500e-9    # longitud d'ona (color verd)
-ps_distance = 0.5    # distància de la lent expansora
+dist_lent = 0.5    # distància de la lent expansora
 default_mirror_diff = 0  # diferència de distància entre els braços (m)
 default_curvature = 0    # radi de curvatura inicial
 
@@ -27,7 +25,7 @@ R = np.sqrt(X**2 + Y**2)
 
 def compute_intensitat(mirror_diff, radi_curv):
     # Diferència de camí òptic  
-    dco = mirror_diff - R**2/(2*ps_distance*1e3)  # Font puntual (front d'ona esfèric) amb factor de magnificació 1e3 per veure-ho millor
+    dco = mirror_diff - R**2/(2*dist_lent*1e3)  # Font puntual (front d'ona esfèric) amb factor de magnificació 1e3 per veure-ho millor
                                                   # El signe negatiu és el conveni escollit en aquest codi
     # Mirall corbat
     if radi_curv > 0: # per R=0 és un cas especial, en aquest codi significa un mirall pla
@@ -100,59 +98,37 @@ def trobar_anells(intensitat): # ens busca els 2 primers anells consecutius més
     
     return None, None
 
-# Creació de la figura
-fig = plt.figure(figsize=(12, 8))
-gs = plt.GridSpec(1, 2, width_ratios=[3, 1])
-ax = fig.add_subplot(gs[0])
-text_ax = fig.add_subplot(gs[1])
-text_ax.axis('off')
-
-plt.subplots_adjust(left=0.1, bottom=0.2, right=0.9, top=0.9)
-
-# Plot inicial
-intensitat = compute_intensitat(default_mirror_diff, default_curvature)
-img = ax.imshow(intensitat,
-               extent=[-screen_size/2, screen_size/2, -screen_size/2, screen_size/2],
-               cmap='gray', vmin=0, vmax=1)
-ax.set_title('Interferòmetre de Michelson: mirall esfèric')
-ax.set_xlabel('x (m)')
-ax.set_ylabel('y (m)')
-plt.colorbar(img, ax=ax, label='intensitat')
-
-# Afegim sliders
-ax_slider_d = plt.axes([0.2, 0.1, 0.4, 0.03])
-ax_slider_r = plt.axes([0.2, 0.05, 0.4, 0.03])
-
-slider_d = Slider(ax_slider_d, 'Distància miralls Δd (µm)', -2, 2, valinit=0)
-slider_r = Slider(ax_slider_r, 'Radi curvatura R (m)', 0, 10, valinit=0)
-
-slider_d.valtext.set_text(f'{0:.2f} µm') # valors en µm
-slider_r.valtext.set_text(f'{0:.2f} m')
-
-# Add text for measurements in the right area
-text_measurements = text_ax.text(0.1, 0.7, '', transform=text_ax.transAxes,
-                               verticalalignment='top')
-
-def update(val):
-    mirror_diff = slider_d.val * 1e-6  # Convertim µm a m
-    curvature = slider_r.val
+def plot_interferometer(mirror_diff_um, curvature):
+    """
+    Main plotting function that will be called by the interactive widget
+    mirror_diff_um: mirror difference in micrometers
+    curvature: radius of curvature in meters
+    """
+    mirror_diff = mirror_diff_um * 1e-6  # Convert µm to m
     
+    # Create figure
+    fig = plt.figure(figsize=(12, 8))
+    gs = plt.GridSpec(1, 2, width_ratios=[3, 1])
+    ax = fig.add_subplot(gs[0])
+    text_ax = fig.add_subplot(gs[1])
+    text_ax.axis('off')
+    
+    # Calculate and plot intensity
     new_intensitat = compute_intensitat(mirror_diff, curvature)
-    img.set_data(new_intensitat)
+    img = ax.imshow(new_intensitat,
+                   extent=[-screen_size/2, screen_size/2, -screen_size/2, screen_size/2],
+                   cmap='gray', vmin=0, vmax=1)
+    ax.set_title('Interferòmetre de Michelson: mirall esfèric')
+    ax.set_xlabel('x (m)')
+    ax.set_ylabel('y (m)')
+    plt.colorbar(img, ax=ax, label='intensitat')
     
-    slider_d.valtext.set_text(f'{slider_d.val:.2f} µm')
-    slider_r.valtext.set_text(f'{slider_r.val:.2f} m')
-    
-    # càlcul del radi de curvatura a partir dels anells
-    if curvature > 0.3:  # així s'eviten curvatures extremes
+    # Calculate and display measurements
+    if curvature > 0.3:
         r1, r2 = trobar_anells(new_intensitat)
         if r1 is not None and r2 is not None:
-            r1_theory = np.sqrt(2 * 1 * curvature * long_ona)  # Primer anell (m=1)
-            r2_theory = np.sqrt(2 * 2 * curvature * long_ona)  # Segon anell (m=2)
-            
-            print(f"\nPer curvatura R = {curvature:.2f} m:")
-            print(f"Anells detectats: r1 = {r1*1000:.2f} mm, r2 = {r2*1000:.2f} mm")
-            print(f"Predicció teòrica: r1 = {r1_theory*1000:.2f} mm, r2 = {r2_theory*1000:.2f} mm")
+            r1_theory = np.sqrt(2 * 1 * curvature * long_ona)
+            r2_theory = np.sqrt(2 * 2 * curvature * long_ona)
             
             R_calc = calcular_radi_curv(r1, r2)
             if R_calc is not None:
@@ -161,21 +137,26 @@ def update(val):
                 text += f"distància entre anells: {((r2-r1)*1000):.2f} mm\n"
                 text += f"Estimated curvature radius: {R_calc:.2f} m\n"
                 text += f"(Predicció teòrica: r1 = {r1_theory*1000:.2f} mm, r2 = {r2_theory*1000:.2f} mm)"
-                text_measurements.set_text(text)
             else:
                 text = f"Radi primer anell brillant: {r1*1000:.2f} mm\n"
                 text += f"Radi segon anell brillant: {r2*1000:.2f} mm\n"
                 text += f"distància entre anells: {((r2-r1)*1000):.2f} mm\n"
                 text += "No es pot calcular el radi de curvatura"
-                text_measurements.set_text(text)
         else:
-            text_measurements.set_text('No es poden detectar bé els anells')
+            text = 'No es poden detectar bé els anells'
     else:
-        text_measurements.set_text('')
+        text = ''
     
-    fig.canvas.draw_idle()
+    text_ax.text(0.1, 0.7, text, transform=text_ax.transAxes, verticalalignment='top')
+    plt.tight_layout()
+    plt.show()
 
-slider_d.on_changed(update)
-slider_r.on_changed(update)
+# Create interactive widget
+widget = interactive(
+    plot_interferometer,
+    mirror_diff_um=FloatSlider(min=-2, max=2, step=0.1, value=0, description='Δd (µm)'),
+    curvature=FloatSlider(min=0, max=10, step=0.1, value=0, description='R (m)')
+)
 
-plt.show()
+# Display the widget
+display(widget)
