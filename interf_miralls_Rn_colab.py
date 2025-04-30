@@ -30,7 +30,7 @@ def calcul_intensitat(mirror_diff, escala, potencia):
     # Els factors d'escala estan posats perquè la deformació sigui aproximadament equivalent en totes les potències de R
     factors_escala = {
         1.0: 1e-3,     # angle en mrad pel con
-        1.5: 1e-2,     # intermig
+        1.5: 5e-2,     # intermig
         2.0: 1e-1,     # 1/m pel paraboloide
         2.5: 1e0,      # intermig
         3.0: 1e1,      # 1/m² pel cúbic
