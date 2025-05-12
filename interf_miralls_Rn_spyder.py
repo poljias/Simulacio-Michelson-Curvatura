@@ -14,7 +14,7 @@ from matplotlib.widgets import Slider
 screen_size = 0.1    # pantalla 10 cm x 10 cm  
 res = 1000           # 1000 x 1000 píxels
 long_ona = 500e-9    # longitud d'ona (color verd)
-dist_lent = 0.5      # distància de la lent expansora
+dist_lent = 500      # distància de la lent expansora
 default_mirror_diff = 0  # diferència de distància entre els braços (m)
 default_angle = 0    # Angle o deformació inicial
 default_potencia = 1    # Potència per defecte, variable més tard
@@ -26,10 +26,11 @@ R = np.sqrt(X**2 + Y**2)
 
 def calcul_intensitat(mirror_diff, escala, potencia):
     # Diferència de camí òptic  
-    point_source_dco = -R**2/(2*dist_lent*1e3)
+    point_source_dco = -R**2/(2*dist_lent)
     
     # Els factors d'escala estan posats perquè la deformació sigui aproximadament equivalent en totes les potències de R
     factors_escala = {
+        0.5: 1e-4,     # intermig
         1.0: 1e-3,     # angle en mrad pel con
         1.5: 5e-2,     # intermig
         2.0: 1e-1,     # 1/m pel paraboloide
@@ -75,14 +76,14 @@ ax_slider_p = plt.axes([0.2, 0.05, 0.4, 0.03])
 
 slider_d = Slider(ax_slider_d, 'Diferència miralls Δd (µm)', -2, 2, valinit=0)
 slider_a = Slider(ax_slider_a, 'Deformació (mrad)', 0, 1, valinit=0)
-slider_p = Slider(ax_slider_p, 'Potència de R', 1, 4, valinit=1, valstep=0.5)
+slider_p = Slider(ax_slider_p, 'Potència de R', 0.5, 4, valinit=1, valstep=0.5)
 
 slider_d.valtext.set_text(f'{0:.2f} µm')
 slider_a.valtext.set_text(f'{0:.3f}')
 slider_p.valtext.set_text(f'{1:.1f}')
 
 def update(val):
-    mirror_diff = slider_d.val * 1e-6  # Convert µm to m
+    mirror_diff = slider_d.val * 1e-6  # Convertim µm a m
     escala = slider_a.val
     potencia = slider_p.val
     
@@ -93,7 +94,8 @@ def update(val):
     slider_a.valtext.set_text(f'{escala:.3f}')
     slider_p.valtext.set_text(f'{potencia:.1f}')
     
-    shape_names = {
+    nom_forma = {
+        0.5: "sqrt(R)",
         1.0: "Con",
         1.5: "R^1.5",
         2.0: "Paraboloide",
@@ -102,7 +104,7 @@ def update(val):
         3.5: "R^3.5",
         4.0: "Quàrtic"
     }
-    ax.set_title(f'Interferòmetre de Michelson: mirall {shape_names.get(potencia, f"R^{potencia}")}')
+    ax.set_title(f'Interferòmetre de Michelson: mirall {nom_forma.get(potencia, f"R^{potencia}")}')
     
     # Cada dependència en R té una unitat diferent del factor de deformació
     if potencia == int(potencia):

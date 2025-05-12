@@ -13,7 +13,7 @@ from IPython.display import display
 screen_size = 0.1    # pantalla 10 cm x 10 cm  
 res = 1000           # 1000 x 1000 píxels
 long_ona = 500e-9    # longitud d'ona (color verd)
-dist_lent = 0.5      # distància de la lent expansora
+dist_lent = 500      # distància de la lent expansora
 default_mirror_diff = 0  # diferència de distància entre els braços (m)
 default_angle = 0    # Angle o deformació inicial
 default_potencia = 1    # Potència per defecte, variable més tard
@@ -25,10 +25,11 @@ R = np.sqrt(X**2 + Y**2)
 
 def calcul_intensitat(mirror_diff, escala, potencia):
     # Diferència de camí òptic  
-    point_source_dco = -R**2/(2*dist_lent*1e3)
+    point_source_dco = -R**2/(2*dist_lent)
     
     # Els factors d'escala estan posats perquè la deformació sigui aproximadament equivalent en totes les potències de R
     factors_escala = {
+        0.5: 1e-4,     # intermig
         1.0: 1e-3,     # angle en mrad pel con
         1.5: 5e-2,     # intermig
         2.0: 1e-1,     # 1/m pel paraboloide
@@ -49,12 +50,11 @@ def calcul_intensitat(mirror_diff, escala, potencia):
     # Calculem la intensitat, assumint llum perfectament monocromàtica, |g|=1
     return 0.5 * (1 + np.cos(fase))
 
-def plot_interferometer(mirror_diff_um, escala, potencia):
+def plot_interferometre(mirror_diff_um, escala, potencia):
     """
-    Main plotting function that will be called by the interactive widget
-    mirror_diff_um: mirror difference in micrometers
-    escala: deformation scale
-    potencia: power of R
+    Diferència miralls: distància entre miralls en micròmetres
+    escala: factor de deformació
+    potencia: potència de R
     """
     mirror_diff = mirror_diff_um * 1e-6  # Convert µm to m
     
@@ -71,8 +71,8 @@ def plot_interferometer(mirror_diff_um, escala, potencia):
                    extent=[-screen_size/2, screen_size/2, -screen_size/2, screen_size/2],
                    cmap='gray', vmin=0, vmax=1)
     
-    # Set title based on shape
-    shape_names = {
+    nom_forma = {
+        0.5: "sqrt(R)",
         1.0: "Con",
         1.5: "R^1.5",
         2.0: "Paraboloide",
@@ -81,12 +81,12 @@ def plot_interferometer(mirror_diff_um, escala, potencia):
         3.5: "R^3.5",
         4.0: "Quàrtic"
     }
-    ax.set_title(f'Interferòmetre de Michelson: mirall {shape_names.get(potencia, f"R^{potencia}")}')
+    ax.set_title(f'Interferòmetre de Michelson: mirall {nom_forma.get(potencia, f"R^{potencia}")}')
     ax.set_xlabel('x (m)')
     ax.set_ylabel('y (m)')
     plt.colorbar(img, ax=ax, label='intensitat')
     
-    # Add units information to text area
+    # Unitats
     if potencia == int(potencia):
         units = {1: "mrad", 2: "1/m", 3: "1/m²", 4: "1/m³"}
         unit = units.get(int(potencia), f"1/m^{int(potencia)-1}")
@@ -103,10 +103,10 @@ def plot_interferometer(mirror_diff_um, escala, potencia):
 
 # Create interactive widget
 widget = interactive(
-    plot_interferometer,
+    plot_interferometre,
     mirror_diff_um=FloatSlider(min=-2, max=2, step=0.1, value=0, description='Δd (µm)'),
     escala=FloatSlider(min=0, max=1, step=0.001, value=0, description='Deformació'),
-    potencia=FloatSlider(min=1, max=4, step=0.5, value=1, description='Potència R')
+    potencia=FloatSlider(min=0.5, max=4, step=0.5, value=1, description='Potència R')
 )
 
 # Display the widget

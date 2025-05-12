@@ -14,7 +14,7 @@ from IPython.display import display
 screen_size = 0.1    # pantalla 10 cm x 10 cm  
 res = 1000           # 1000 x 1000 píxels
 long_ona = 500e-9    # longitud d'ona (color verd)
-dist_lent = 0.5    # distància de la lent expansora
+dist_lent = 500    # distància de la lent expansora
 default_mirror_diff = 0  # diferència de distància entre els braços (m)
 default_curvature = 0    # radi de curvatura inicial
 
@@ -25,8 +25,8 @@ R = np.sqrt(X**2 + Y**2)
 
 def compute_intensitat(mirror_diff, radi_curv):
     # Diferència de camí òptic  
-    dco = mirror_diff - R**2/(2*dist_lent*1e3)  # Font puntual (front d'ona esfèric) amb factor de magnificació 1e3 per veure-ho millor
-                                                  # El signe negatiu és el conveni escollit en aquest codi
+    dco = mirror_diff - R**2/(2*dist_lent)  # Font puntual (front d'ona esfèric)
+                                            # El signe negatiu és el conveni escollit en aquest codi
     # Mirall corbat
     if radi_curv > 0: # per R=0 és un cas especial, en aquest codi significa un mirall pla
         dco += -R**2/(2*radi_curv)  # Mirall convex. S'afegeix un altre terme negatiu perquè els rajos 
