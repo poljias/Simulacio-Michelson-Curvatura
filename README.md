@@ -19,7 +19,7 @@ El repositori conté dues simulacions principals:
 
 Aquesta simulació permet visualitzar els patrons d'interferència quan un dels miralls té una deformació que segueix una potència de R (distància radial). Les característiques principals són:
 
-- Permet variar la potència de R des de 1 fins a 4 (amb increments de 0.5)
+- Permet variar la potència de R des de 0,5 fins a 4 (amb increments de 0.5)
   - R¹: Deformació cònica
   - R²: Deformació parabòlica
   - R³: Deformació cúbica
@@ -46,7 +46,7 @@ Ambdues simulacions comparteixen alguns paràmetres bàsics:
 - Pantalla: 10 cm × 10 cm
 - Resolució: 1000 × 1000 píxels
 - Longitud d'ona: 500 nm (llum verda)
-- Distància de la lent expansora: 0.5 m
+- Distància de la lent expansora: 500 m
 
 ## Com utilitzar les simulacions
 
