@@ -155,7 +155,7 @@ def plot_interferometer(mirror_diff_um, curvature):
 widget = interactive(
     plot_interferometer,
     mirror_diff_um=FloatSlider(min=-2, max=2, step=0.1, value=0, description='Δd (µm)'),
-    curvature=FloatSlider(min=0, max=10, step=0.1, value=0, description='R (m)')
+    curvature=FloatSlider(min=0, max=20, step=0.1, value=0, description='R (m)')
 )
 
 # Display the widget
