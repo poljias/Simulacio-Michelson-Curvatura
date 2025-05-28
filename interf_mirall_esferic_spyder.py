@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Apr 23 19:31:29 2025
+Created on Wed May 28 15:55:01 2025
 
 @author: polji
 """
@@ -124,7 +124,7 @@ ax_slider_d = plt.axes([0.2, 0.1, 0.4, 0.03])
 ax_slider_r = plt.axes([0.2, 0.05, 0.4, 0.03])
 
 slider_d = Slider(ax_slider_d, 'Distància miralls Δd (µm)', -2, 2, valinit=0)
-slider_r = Slider(ax_slider_r, 'Radi curvatura R (m)', 0, 10, valinit=0)
+slider_r = Slider(ax_slider_r, 'Radi curvatura R (m)', 0, 20, valinit=0)
 
 slider_d.valtext.set_text(f'{0:.2f} µm') # valors en µm
 slider_r.valtext.set_text(f'{0:.2f} m')
@@ -159,7 +159,7 @@ def update(val):
                 text = f"Radi primer anell brillant: {r1*1000:.2f} mm\n"
                 text += f"Radi segon anell brillant: {r2*1000:.2f} mm\n"
                 text += f"distància entre anells: {((r2-r1)*1000):.2f} mm\n"
-                text += f"Estimated curvature radius: {R_calc:.2f} m\n"
+                text += f"Radi de curvatura estimat: {R_calc:.2f} m\n"
                 text += f"(Predicció teòrica: r1 = {r1_theory*1000:.2f} mm, r2 = {r2_theory*1000:.2f} mm)"
                 text_measurements.set_text(text)
             else:
