@@ -100,20 +100,20 @@ def trobar_anells(intensitat): # ens busca els 2 primers anells consecutius més
 
 def plot_interferometer(mirror_diff_um, curvature):
     """
-    Main plotting function that will be called by the interactive widget
-    mirror_diff_um: mirror difference in micrometers
-    curvature: radius of curvature in meters
+    El plot principal, fet a partir de widgets interactius
+    mirror_diff_um: diferència dels miralls en micròmetres
+    curvature: radi de curvatura en metres
     """
-    mirror_diff = mirror_diff_um * 1e-6  # Convert µm to m
+    mirror_diff = mirror_diff_um * 1e-6
     
-    # Create figure
+    # Creem la figura
     fig = plt.figure(figsize=(12, 8))
     gs = plt.GridSpec(1, 2, width_ratios=[3, 1])
     ax = fig.add_subplot(gs[0])
     text_ax = fig.add_subplot(gs[1])
     text_ax.axis('off')
     
-    # Calculate and plot intensity
+    # Calculem la intensitat
     new_intensitat = compute_intensitat(mirror_diff, curvature)
     img = ax.imshow(new_intensitat,
                    extent=[-screen_size/2, screen_size/2, -screen_size/2, screen_size/2],
@@ -123,7 +123,7 @@ def plot_interferometer(mirror_diff_um, curvature):
     ax.set_ylabel('y (m)')
     plt.colorbar(img, ax=ax, label='intensitat')
     
-    # Calculate and display measurements
+    # Calculem les mesures dels radis i les ensenyem
     if curvature > 0.3:
         r1, r2 = trobar_anells(new_intensitat)
         if r1 is not None and r2 is not None:
@@ -151,12 +151,11 @@ def plot_interferometer(mirror_diff_um, curvature):
     plt.tight_layout()
     plt.show()
 
-# Create interactive widget
+# Creem widget interactiu
 widget = interactive(
     plot_interferometer,
     mirror_diff_um=FloatSlider(min=-2, max=2, step=0.1, value=0, description='Δd (µm)'),
     curvature=FloatSlider(min=0, max=20, step=0.1, value=0, description='R (m)')
 )
 
-# Display the widget
 display(widget)
